@@ -3,7 +3,7 @@
 /*DATABASE SETTINGS*/
 define('DATABASE','incuwire');
 define('DB_USER','root');
-define('DB_PASSWORD','francia1998');
+define('DB_PASSWORD','secret');
 define('PORT',3306);
 define('HOST','localhost');
 
