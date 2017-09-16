@@ -13,17 +13,15 @@
 #
 ############################################################################################################
 
-*
+*/
 
 
 require_once(CONF_PATH.'DBUtil.php');
 
-
 /*
    Agrupa las operaciones del CRUD correspondiente a la tabla usuario
 */
-$app->group('api/user/',function(){
-
+$app->group('/api/user/',function(){
 
     /*
         Carga todos los registros de la tabla usuario
