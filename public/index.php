@@ -5,6 +5,6 @@ require_once '../app/conf/settings.php';
 
 $app = new \Slim\App;
 
-require_once(ROUTES_PATH.'restapi.php');
+require_once(ROUTES_PATH.'restapi/usuario.php');
 
 $app->run();
