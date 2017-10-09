@@ -9,12 +9,13 @@ $app->group('/api/usuario/',function(){
 
         $json_result = '{"notice": {"text": "no hay conexion en la base de datos"}}';
         if(DBUtil::getInstance()){
-            $users = R::find('usuario');
+            $usuarios = R::find('usuario');
             
             
             $response->withHeader('Content-Type', 'application/json');
-            $json_result = json_encode(R::exportAll($users),JSON_PRETTY_PRINT);
+            $json_result = json_encode(R::exportAll($usuarios),JSON_PRETTY_PRINT);
         }
+         $response->withHeader('Content-Type', 'application/json');
          echo ($json_result);
     });
 
@@ -22,17 +23,17 @@ $app->group('/api/usuario/',function(){
         
         $json_result = '{"notice": {"text": "no hay conexion en la base de datos"}}';
         if(DBUtil::getInstance()){
-            $user = R::findOne('usuario','id  = ?',[ $args['id']]);
+            $usuario = R::findOne('usuario','id  = ?',[ $args['id']]);
             if($user){
-                $response->withHeader('Content-Type', 'application/json');
-                $json_result = json_encode($user->export(),JSON_PRETTY_PRINT);
+                $json_result = json_encode($usuario->export(),JSON_PRETTY_PRINT);
             }
             else $json_result = '{"notice": {"text": "id usuario no valido"}}'; 
         }
+        $response->withHeader('Content-Type', 'application/json');
         echo $json_result;
     });
 
-    $this->delete('delete/{id}',function($request){
+    $this->delete('delete/{id}',function($request,$response){
         
         $json_result = '{"notice": {"text": "no hay conexion en la base de datos"}}';
         if(DBUtil::getInstance()){
@@ -40,41 +41,50 @@ $app->group('/api/usuario/',function(){
             $usuario = R::load('usuario',$id);
 
 
-            if($usuario){
+            if($usuario->id){
                 R::begin();
                 try{
-                    R::trash($user);
+                    R::trash($usuario);
                     R::commit();
                     $json_result = '{"notice": {"text": "usuario eliminado correctamente}}';
                 }catch(Exception $e){
                     R::rollback();
-                    $json_result = '{"notice": {"text": "id usuario no valido"}}';
+                    $json_result = '{"notice": {"text": "'.$e->getmessage().'"}}';
                 }
             }
-            else $json_result = '{"notice": {"text": "'.$e->getmessage().'"}}';
+            else  $json_result = '{"notice": {"text": "id usuario no valido"}}';
         }
+        $response->withHeader('Content-Type', 'application/json');
         echo $json_result;
     });
 
-    $this->post('add/',function($request){
+    $this->post('add',function($request,$response){
 
         $json_result = '{"notice": {"text": "no hay conexion en la base de datos"}}';
         if(DBUtil::getInstance()){
 
             $usuario = R::dispense( 'usuario' );
-            $usuario->nombre = $request->getparam('nombre');
-            $usuario->email = $request->getparam('email');
-            $usuario->password = $request->getparam('password');
-            $usuario->estatus = $request->getparam('estatus');
+            $usuario->nombre = $request->getParam('nombre');
+            $usuario->email = $request->getParam('email');
+            $usuario->password = $request->getParam('password');
+            $usuario->estatus = $request->getParam('estatus');
 
-            R::store($usuario);
-            $json_result = '{"notice": {"text": "usuario agregado"}}';
+            R::begin();
+            try{
+                R::store($usuario);
+                R::commit();
+                $json_result = '{"notice": {"text": "usuario agregado"}}';
+            }catch(Exception $e){
+                R::rollback();
+                $json_result = '{"notice": {"text": "'.$e->getmessage().'"}}';
+            }
         }
+        $response->withHeader('Content-Type', 'application/json');
         echo $json_result;
     });
 
 
-    $this->put('update/{id}',function($request){
+    $this->put('update/{id}',function($request,$response){
 
         $json_result = '{"notice": {"text": "no hay conexion en la base de datos"}}';
         if(DBUtil::getInstance()){
@@ -83,16 +93,23 @@ $app->group('/api/usuario/',function(){
             $usuario = R::load( 'usuario', $id );
             $json_result = '';
 
-            if($usuario){
-                $usuario->nombre = $request->getparam('nombre');
-                $usuario->email = $request->getparam('email');
-                $usuario->password = $request->getparam('password');
-                $usuario->estatus = $request->getparam('estatus');
-                R::store($usuario);
-                $json_result = '{"notice": {"text": "usuario actualizado"}}';
+            if($usuario->id){
+                $usuario->nombre = $request->getParam('nombre');
+                $usuario->email = $request->getParam('email');
+                $usuario->password = $request->getParam('password');
+                $usuario->estatus = $request->getParam('estatus');
+                try{
+                    R::store($usuario);
+                    R::commit();
+                    $json_result = '{"notice": {"text": "usuario actualizado"}}';
+                }catch(Exception $e){
+                    R::rollback();
+                    $json_result = '{"notice": {"text": "'.$e->getmessage().'"}}';
+                }
             }
             else $json_result = '{"notice": {"text": "id usuario no valido"}}';
         }
+        $response->withHeader('Content-Type', 'application/json');
         echo $json_result;
     });
 
